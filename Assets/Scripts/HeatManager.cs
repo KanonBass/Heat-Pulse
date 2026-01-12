@@ -86,15 +86,6 @@ public class HeatManager : MonoBehaviour
         OnHeatUpdate?.Invoke(_heatValue);
     }
 
-    public void UpdateRed()
-    {
-        UpdateHeatBar(HeatColorType.Red);
-    }
-    public void UpdateBlue()
-    {
-        UpdateHeatBar(HeatColorType.Blue);
-    }
-
     public void SetHeatBar(float value)
     {
         _heatValue = Mathf.Clamp(value, 0, 1);
