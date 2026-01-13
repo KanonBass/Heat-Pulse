@@ -5,36 +5,50 @@ using UnityEngine;
 
 public class PlayerMoveManager : MonoBehaviour
 {
+    public static PlayerMoveManager Instance;
+
     [SerializeField] private List<CombatMove> _moveList = new();
 
     public static List<CombatMove> _currentMoves = new();
     public static List<MoveType> _emptyTypeList = new();
 
     private int _maxMoves = 3;
+    public event Action OnMovesetGenerated;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     void Start()
     {
-        DefaultMoveSelection();
-        foreach (CombatMove move in _currentMoves)
-        {
-            Debug.Log(move.moveName);
-        }
     }
 
     public void GenerateMoveList()
     {
         _currentMoves.Clear();
-        NewMoveSelection(_emptyTypeList);
-        foreach (CombatMove move in _currentMoves)
-        {
-            Debug.Log(move.moveName);
-        }
+        GenerateMoveSet(_emptyTypeList);
     }
 
-    public void NewMoveSelection(List<MoveType> types)
+    public void MoveSelected(CombatMove move)
+    {
+        _currentMoves.Clear();
+
+        List<MoveType> moveList = move.combos.ToList();
+
+        GenerateMoveSet(moveList);
+    }
+
+    public void GenerateMoveSet(List<MoveType> types)
     {
         if (_currentMoves.Count >= _maxMoves)
         {
+            foreach (CombatMove move in _currentMoves)
+            {
+                Debug.Log(move.moveName);
+            }
+
+            OnMovesetGenerated?.Invoke();
             return;
         }
 
@@ -68,18 +82,24 @@ public class PlayerMoveManager : MonoBehaviour
             types.Remove(possibleMoves[index].moveType);
         }
 
-        NewMoveSelection(types);
+        GenerateMoveSet(types);
     }
 
     public void DefaultMoveSelection()
     {
         int index = UnityEngine.Random.Range(0, _moveList.Count);
+
+        while (_currentMoves.Contains(_moveList[index]))
+        {
+            index = UnityEngine.Random.Range(0, _moveList.Count);
+        }
+
         _currentMoves.Add(_moveList[index]);
 
         List<MoveType> moveTypes = Enum.GetValues(typeof(MoveType)).Cast<MoveType>().ToList();
         moveTypes.Remove(_moveList[index].moveType);
 
-        NewMoveSelection(moveTypes);
+        GenerateMoveSet(moveTypes);
     }
 
     public List<CombatMove> FindMoveByType(MoveType type)

@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class HeatManager : MonoBehaviour
 {
+    public static HeatManager instance;
+
     static private Dictionary<HeatColorType, Color> HeatColorRelation = new();
 
     [SerializeField] private float _heatMultiplier = 1f;
@@ -23,10 +25,10 @@ public class HeatManager : MonoBehaviour
     private Gradient _heatGradient = new();
 
     public event Action<float> OnHeatUpdate;
-    
 
     void Awake()
     {
+        HeatManager.instance = this;
         InitializeHeatColorRelation();
         InitializeHeatBar();
     }
